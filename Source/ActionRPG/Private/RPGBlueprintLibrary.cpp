@@ -2,6 +2,7 @@
 
 #include "RPGBlueprintLibrary.h"
 #include "ActionRPGLoadingScreen.h"
+#include "Misc/ConfigCacheIni.h"
 
 
 URPGBlueprintLibrary::URPGBlueprintLibrary(const FObjectInitializer& ObjectInitializer)
@@ -51,14 +52,17 @@ bool URPGBlueprintLibrary::DoesEffectContainerSpecHaveTargets(const FRPGGameplay
 	return ContainerSpec.HasValidTargets();
 }
 
-FRPGGameplayEffectContainerSpec URPGBlueprintLibrary::AddTargetsToEffectContainerSpec(const FRPGGameplayEffectContainerSpec& ContainerSpec, const TArray<FHitResult>& HitResults, const TArray<AActor*>& TargetActors)
+FRPGGameplayEffectContainerSpec URPGBlueprintLibrary::AddTargetsToEffectContainerSpec(
+	const FRPGGameplayEffectContainerSpec& ContainerSpec, const TArray<FHitResult>& HitResults,
+	const TArray<AActor*>& TargetActors)
 {
 	FRPGGameplayEffectContainerSpec NewSpec = ContainerSpec;
 	NewSpec.AddTargets(HitResults, TargetActors);
 	return NewSpec;
 }
 
-TArray<FActiveGameplayEffectHandle> URPGBlueprintLibrary::ApplyExternalEffectContainerSpec(const FRPGGameplayEffectContainerSpec& ContainerSpec)
+TArray<FActiveGameplayEffectHandle> URPGBlueprintLibrary::ApplyExternalEffectContainerSpec(
+	const FRPGGameplayEffectContainerSpec& ContainerSpec)
 {
 	TArray<FActiveGameplayEffectHandle> AllEffects;
 

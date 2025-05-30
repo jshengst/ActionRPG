@@ -4,6 +4,8 @@
 #include "Items/RPGItem.h"
 #include "AbilitySystemGlobals.h"
 #include "Abilities/RPGGameplayAbility.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
 
 ARPGCharacterBase::ARPGCharacterBase()
 {
@@ -26,13 +28,14 @@ UAbilitySystemComponent* ARPGCharacterBase::GetAbilitySystemComponent() const
 void ARPGCharacterBase::AddStartupGameplayAbilities()
 {
 	check(AbilitySystemComponent);
-	
+
 	if (GetLocalRole() == ROLE_Authority && !bAbilitiesInitialized)
 	{
 		// Grant abilities, but only on the server	
 		for (TSubclassOf<URPGGameplayAbility>& StartupAbility : GameplayAbilities)
 		{
-			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(StartupAbility, GetCharacterLevel(), INDEX_NONE, this));
+			AbilitySystemComponent->GiveAbility(
+				FGameplayAbilitySpec(StartupAbility, GetCharacterLevel(), INDEX_NONE, this));
 		}
 
 		// Now apply passives
@@ -41,10 +44,12 @@ void ARPGCharacterBase::AddStartupGameplayAbilities()
 			FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
 			EffectContext.AddSourceObject(this);
 
-			FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(GameplayEffect, GetCharacterLevel(), EffectContext);
+			FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(
+				GameplayEffect, GetCharacterLevel(), EffectContext);
 			if (NewHandle.IsValid())
 			{
-				FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), AbilitySystemComponent);
+				FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(
+					*NewHandle.Data.Get(), AbilitySystemComponent);
 			}
 		}
 
@@ -109,7 +114,8 @@ void ARPGCharacterBase::FillSlottedAbilitySpecs(TMap<FRPGItemSlot, FGameplayAbil
 	{
 		if (DefaultPair.Value.Get())
 		{
-			SlottedAbilitySpecs.Add(DefaultPair.Key, FGameplayAbilitySpec(DefaultPair.Value, GetCharacterLevel(), INDEX_NONE, this));
+			SlottedAbilitySpecs.Add(DefaultPair.Key,
+			                        FGameplayAbilitySpec(DefaultPair.Value, GetCharacterLevel(), INDEX_NONE, this));
 		}
 	}
 
@@ -134,7 +140,9 @@ void ARPGCharacterBase::FillSlottedAbilitySpecs(TMap<FRPGItemSlot, FGameplayAbil
 			if (SlottedItem && SlottedItem->GrantedAbility)
 			{
 				// This will override anything from default
-				SlottedAbilitySpecs.Add(ItemPair.Key, FGameplayAbilitySpec(SlottedItem->GrantedAbility, AbilityLevel, INDEX_NONE, SlottedItem));
+				SlottedAbilitySpecs.Add(ItemPair.Key,
+				                        FGameplayAbilitySpec(SlottedItem->GrantedAbility, AbilityLevel, INDEX_NONE,
+				                                             SlottedItem));
 			}
 		}
 	}
@@ -144,7 +152,7 @@ void ARPGCharacterBase::AddSlottedGameplayAbilities()
 {
 	TMap<FRPGItemSlot, FGameplayAbilitySpec> SlottedAbilitySpecs;
 	FillSlottedAbilitySpecs(SlottedAbilitySpecs);
-	
+
 	// Now add abilities if needed
 	for (const TPair<FRPGItemSlot, FGameplayAbilitySpec>& SpecPair : SlottedAbilitySpecs)
 	{
@@ -177,14 +185,15 @@ void ARPGCharacterBase::RemoveSlottedGameplayAbilities(bool bRemoveAll)
 			// Need to check desired ability specs, if we got here FoundSpec is valid
 			FGameplayAbilitySpec* DesiredSpec = SlottedAbilitySpecs.Find(ExistingPair.Key);
 
-			if (!DesiredSpec || DesiredSpec->Ability != FoundSpec->Ability || DesiredSpec->SourceObject != FoundSpec->SourceObject)
+			if (!DesiredSpec || DesiredSpec->Ability != FoundSpec->Ability || DesiredSpec->SourceObject != FoundSpec->
+				SourceObject)
 			{
 				bShouldRemove = true;
 			}
 		}
-		
+
 		if (bShouldRemove)
-		{	
+		{
 			if (FoundSpec)
 			{
 				// Need to remove registered ability
@@ -206,8 +215,10 @@ void ARPGCharacterBase::PossessedBy(AController* NewController)
 
 	if (InventorySource)
 	{
-		InventoryUpdateHandle = InventorySource->GetSlottedItemChangedDelegate().AddUObject(this, &ARPGCharacterBase::OnItemSlotChanged);
-		InventoryLoadedHandle = InventorySource->GetInventoryLoadedDelegate().AddUObject(this, &ARPGCharacterBase::RefreshSlottedGameplayAbilities);
+		InventoryUpdateHandle = InventorySource->GetSlottedItemChangedDelegate().AddUObject(
+			this, &ARPGCharacterBase::OnItemSlotChanged);
+		InventoryLoadedHandle = InventorySource->GetInventoryLoadedDelegate().AddUObject(
+			this, &ARPGCharacterBase::RefreshSlottedGameplayAbilities);
 	}
 
 	// Initialize our abilities
@@ -254,7 +265,9 @@ void ARPGCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 float ARPGCharacterBase::GetHealth() const
 {
 	if (!AttributeSet)
-	return 1.f;
+	{
+		return 1.f;
+	}
 
 	return AttributeSet->GetHealth();
 }
@@ -310,7 +323,8 @@ bool ARPGCharacterBase::ActivateAbilitiesWithItemSlot(FRPGItemSlot ItemSlot, boo
 	return false;
 }
 
-void ARPGCharacterBase::GetActiveAbilitiesWithItemSlot(FRPGItemSlot ItemSlot, TArray<URPGGameplayAbility*>& ActiveAbilities)
+void ARPGCharacterBase::GetActiveAbilitiesWithItemSlot(FRPGItemSlot ItemSlot,
+                                                       TArray<URPGGameplayAbility*>& ActiveAbilities)
 {
 	FGameplayAbilitySpecHandle* FoundHandle = SlottedAbilities.Find(ItemSlot);
 
@@ -341,7 +355,8 @@ bool ARPGCharacterBase::ActivateAbilitiesWithTags(FGameplayTagContainer AbilityT
 	return false;
 }
 
-void ARPGCharacterBase::GetActiveAbilitiesWithTags(FGameplayTagContainer AbilityTags, TArray<URPGGameplayAbility*>& ActiveAbilities)
+void ARPGCharacterBase::GetActiveAbilitiesWithTags(FGameplayTagContainer AbilityTags,
+                                                   TArray<URPGGameplayAbility*>& ActiveAbilities)
 {
 	if (AbilitySystemComponent)
 	{
@@ -349,15 +364,17 @@ void ARPGCharacterBase::GetActiveAbilitiesWithTags(FGameplayTagContainer Ability
 	}
 }
 
-bool ARPGCharacterBase::GetCooldownRemainingForTag(FGameplayTagContainer CooldownTags, float& TimeRemaining, float& CooldownDuration)
+bool ARPGCharacterBase::GetCooldownRemainingForTag(FGameplayTagContainer CooldownTags, float& TimeRemaining,
+                                                   float& CooldownDuration)
 {
 	if (AbilitySystemComponent && CooldownTags.Num() > 0)
 	{
 		TimeRemaining = 0.f;
 		CooldownDuration = 0.f;
 
-		FGameplayEffectQuery const Query = FGameplayEffectQuery::MakeQuery_MatchAnyOwningTags(CooldownTags);
-		TArray< TPair<float, float> > DurationAndTimeRemaining = AbilitySystemComponent->GetActiveEffectsTimeRemainingAndDuration(Query);
+		const FGameplayEffectQuery Query = FGameplayEffectQuery::MakeQuery_MatchAnyOwningTags(CooldownTags);
+		TArray<TPair<float, float>> DurationAndTimeRemaining = AbilitySystemComponent->
+			GetActiveEffectsTimeRemainingAndDuration(Query);
 		if (DurationAndTimeRemaining.Num() > 0)
 		{
 			int32 BestIdx = 0;
@@ -380,9 +397,11 @@ bool ARPGCharacterBase::GetCooldownRemainingForTag(FGameplayTagContainer Cooldow
 	return false;
 }
 
-void ARPGCharacterBase::HandleDamage(float DamageAmount, const FHitResult& HitInfo, const struct FGameplayTagContainer& DamageTags, ARPGCharacterBase* InstigatorPawn, AActor* DamageCauser)
+void ARPGCharacterBase::HandleDamage(float DamageAmount, const FHitResult& HitInfo,
+                                     const struct FGameplayTagContainer& DamageTags, ARPGCharacterBase* InstigatorPawn,
+                                     AActor* DamageCauser)
 {
-	OnDamaged(DamageAmount, HitInfo, DamageTags, InstigatorPawn, DamageCauser);	
+	OnDamaged(DamageAmount, HitInfo, DamageTags, InstigatorPawn, DamageCauser);
 }
 
 void ARPGCharacterBase::HandleHealthChanged(float DeltaValue, const struct FGameplayTagContainer& EventTags)

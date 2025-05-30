@@ -4,12 +4,14 @@
 
 #include "ActionRPG.h"
 #include "Abilities/Tasks/AbilityTask.h"
+#include "Animation/AnimMontage.h"
 #include "RPGAbilityTask_PlayMontageAndWaitForEvent.generated.h"
 
 class URPGAbilitySystemComponent;
 
 /** Delegate type used, EventTag and Payload may be empty if it came from the montage callbacks */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRPGPlayMontageAndWaitForEventDelegate, FGameplayTag, EventTag, FGameplayEventData, EventData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRPGPlayMontageAndWaitForEventDelegate, FGameplayTag, EventTag,
+                                             FGameplayEventData, EventData);
 
 /**
  * This task combines PlayMontageAndWait and WaitForEvent into one task, so you can wait for multiple types of activations such as from a melee combo
@@ -63,7 +65,8 @@ public:
 	 * @param bStopWhenAbilityEnds If true, this montage will be aborted if the ability ends normally. It is always stopped when the ability is explicitly cancelled
 	 * @param AnimRootMotionTranslationScale Change to modify size of root motion or set to 0 to block it entirely
 	 */
-	UFUNCTION(BlueprintCallable, Category="Ability|Tasks", meta = (HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
+	UFUNCTION(BlueprintCallable, Category="Ability|Tasks",
+		meta = (HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
 	static URPGAbilityTask_PlayMontageAndWaitForEvent* PlayMontageAndWaitForEvent(
 		UGameplayAbility* OwningAbility,
 		FName TaskInstanceName,
