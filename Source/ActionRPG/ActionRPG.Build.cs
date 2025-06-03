@@ -1,5 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
+using System.IO;
 using UnrealBuildTool;
 
 public class ActionRPG : ModuleRules
@@ -7,10 +8,11 @@ public class ActionRPG : ModuleRules
 	public ActionRPG(ReadOnlyTargetRules Target)
 		: base(Target)
 	{
-		PrivatePCHHeaderFile = "Public/ActionRPG.h";
+		PrivatePCHHeaderFile = "ActionRPG/ActionRPG.h";
 
 		PublicDependencyModuleNames.AddRange(
-			new string[] {
+			new[]
+			{
 				"Core",
 				"CoreUObject",
 				"Engine"
@@ -18,7 +20,8 @@ public class ActionRPG : ModuleRules
 		);
 
 		PrivateDependencyModuleNames.AddRange(
-			new string[] {
+			new[]
+			{
 				"ActionRPGLoadingScreen",
 				"Slate",
 				"SlateCore",
@@ -33,20 +36,19 @@ public class ActionRPG : ModuleRules
 
 		if (Target.Platform == UnrealTargetPlatform.IOS)
 		{
-			PrivateDependencyModuleNames.AddRange(new string[] { "OnlineSubsystem", "OnlineSubsystemUtils" });
+			PrivateDependencyModuleNames.AddRange(new[] { "OnlineSubsystem", "OnlineSubsystemUtils" });
 			DynamicallyLoadedModuleNames.Add("OnlineSubsystemFacebook");
 			DynamicallyLoadedModuleNames.Add("OnlineSubsystemIOS");
 			DynamicallyLoadedModuleNames.Add("IOSAdvertising");
 		}
 		else if (Target.Platform == UnrealTargetPlatform.Android)
 		{
-			PrivateDependencyModuleNames.AddRange(new string[] { "OnlineSubsystem", "OnlineSubsystemUtils" });
+			PrivateDependencyModuleNames.AddRange(new[] { "OnlineSubsystem", "OnlineSubsystemUtils" });
 			DynamicallyLoadedModuleNames.Add("AndroidAdvertising");
 			DynamicallyLoadedModuleNames.Add("OnlineSubsystemGooglePlay");
-            // Add UPL to add configrules.txt to our APK
-            string PluginPath = Utils.MakePathRelativeTo(ModuleDirectory, Target.RelativeEnginePath);
-            AdditionalPropertiesForReceipt.Add("AndroidPlugin", System.IO.Path.Combine(PluginPath, "AddRoundIcon_UPL.xml"));
-
-        }
-    }
+			// Add UPL to add configrules.txt to our APK
+			var PluginPath = Utils.MakePathRelativeTo(ModuleDirectory, Target.RelativeEnginePath);
+			AdditionalPropertiesForReceipt.Add("AndroidPlugin", Path.Combine(PluginPath, "AddRoundIcon_UPL.xml"));
+		}
+	}
 }
