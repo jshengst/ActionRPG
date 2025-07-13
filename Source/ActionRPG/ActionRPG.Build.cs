@@ -8,7 +8,7 @@ public class ActionRPG : ModuleRules
 	public ActionRPG(ReadOnlyTargetRules Target)
 		: base(Target)
 	{
-		PrivatePCHHeaderFile = "ActionRPG/ActionRPG.h";
+		// PrivatePCHHeaderFile = "ActionRPG/ActionRPG.h";
 
 		PublicDependencyModuleNames.AddRange(
 			new[]

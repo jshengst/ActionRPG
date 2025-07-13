@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
-using System.Collections.Generic;
 
 public class ActionRPGEditorTarget : TargetRules
 {
@@ -9,7 +8,9 @@ public class ActionRPGEditorTarget : TargetRules
 		: base(Target)
 	{
 		Type = TargetType.Editor;
-		ExtraModuleNames.AddRange(new string[] { "ActionRPG" });
+		ExtraModuleNames.AddRange(new[] { "ActionRPG" });
+
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_6;
 
 		DefaultBuildSettings = BuildSettingsVersion.V5;
 	}
